@@ -14,6 +14,7 @@ Created on Sat Aug 24 13:29:25 2019
 @author: samchristian
 KS test
 """
+#TODO: For safety, do what horvath did and compare with other redshift ranges
 import numpy as np
 from numpy.random import power
 import matplotlib.pyplot as plt
@@ -22,13 +23,17 @@ from astropy import units as u
 from sklearn.metrics.pairwise import haversine_distances as haversine
 import pandas as pd
 import time
-#TODO: import mean
+import seaborn as sns
 from scipy import stats
 from statistics import mean
+sns.set_color_codes()
 data = pd.read_csv(r'/Users/samchristian/Downloads/grb-frompaper.csv')
 #print(type(data))
 data = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
 zs1 = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
+data_different = data.loc[(data['z'] <= 9.4) & (data['z'] >= 2.68)]
+ras2 = data_different.loc[:, ['ra']].values
+decs2 = data_different.loc[:, ['dec']].values
 ras1 = data.loc[:, ['ra']].values
 decs1 = data.loc[:, ['dec']].values
 print(len(zs1))
@@ -65,15 +70,21 @@ def nearest_neighbor(points):
                 continue
             #print(points[j])
             #print(point, points[j])
-            distance = haversine([point, points[j]]) #TODO: Change
+            distance = haversine([point, points[j]])
             distances.append(distance[0][1])
             j += 1
         #print(distances)
         ascending = sorted(distances)
+        for m in ascending:
+            final_distributions.append(m)
         closest_points.append(ascending[22]) #change 29 to kth nearest neighbor
         i += 1
 
-        
+final_distributions = []
+n = 0
+#while n < 44:
+#    final_distributions.append([])
+
         
 normalize = 0.00276920001229
 random = np.random.rand(100)
@@ -96,6 +107,7 @@ i = 0
 sky_dist = []
 sky_cords = []
 print(i)
+nobs = 44
 while i < nobs:
     number = np.random.rand(1)
     if number < 0.804805705672:
@@ -114,7 +126,7 @@ radius = 0.8953539
 #print(test_points)
 points1 = []
 num = 44
-iter_2 = 1000
+iter_2 = 100
 while l < (num*iter_2 + 1): 
    # print(l)
     point = print_random_star_coords(1)
@@ -135,7 +147,7 @@ while k < iter_2:
 closest_points = []
 density_function_actual = []
 points_actual = []
-for (i, j) in zip(ras1, decs1):
+for (i, j) in zip(decs1, ras1):
     #print(i)
     points_actual.append([i[0], j[0]])
 #print(points_actual)
@@ -150,7 +162,7 @@ statistics_k_value = []
 statistics_k_value1 = []
 #print(density_function_actual)
 i = 0
-while i < len(points_iters):
+while i < iter_2:
     compare_1 = points_iters[i]
     compare_2 = points_iters[i+1]
     statistics_k_value.append(stats.ks_2samp(compare_1, compare_2)[0])
@@ -160,13 +172,18 @@ while i < len(points_iters):
 #    n, bins, patches = ax.hist(i, n_bins, density=True, histtype='step',
 #                           cumulative=True, label='Empirical', color='green')
 #    statistics_k_value.append(stats.ks_2samp(i, density_function_actual[0])[0])   
-plt.show()
-ax.hist(statistics_k_value, 100)
-print(mean(statistics_k_value))
-ax.hist(statistics_k_value1, 100)
+#plt.show()
+#ax.hist(statistics_k_value, 20)
+#ax.hist(statistics_k_value1, 20)
 distribution = pd.Series(statistics_k_value1)
 lessthan = distribution[distribution < mean(statistics_k_value)]
 greaterthan = distribution[distribution > mean(statistics_k_value)]
+for i in points_iters:
+    sns.distplot(i, hist = False, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color='g')
+sns.distplot(density_function_actual, hist = False, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color='r')
 print(len(lessthan))
 print(len(greaterthan))
+print(len(distribution))
 print(mean(statistics_k_value))
+print(statistics_k_value)
+print(statistics_k_value1)
