@@ -18,7 +18,7 @@ from scipy import stats
 import seaborn as sns
 data = pd.read_csv(r'/Users/samchristian/Downloads/grb-frompaper.csv')
 #print(type(data))
-data = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)] #TODO: change this range back to the original
+data = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
 zs1 = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
 ras1 = data.loc[:, ['ra']].values
 decs1 = data.loc[:, ['dec']].values
@@ -62,10 +62,7 @@ def nearest_neighbor(points):
         #print(distances)
         ascending = sorted(distances)
         closest_points.append(ascending[22]) #change to desired kth nearest neighbor
-        i += 1
-
-        
-        
+        i += 1    
 normalize = 0.00276920001229
 random = np.random.rand(100)
 number1 = 3.85
@@ -98,11 +95,7 @@ while i < nobs:
     sky_cords.append(print_random_star_coords(1))    
     #print(print_random_star_coords(1))
     i += 1
-test_radii = 10000
 l = 0
-radius = 0.8953539
-#test_points = print_random_star_coords(test_radii)
-#print(test_points)
 points1 = []
 num = 90
 iter_2 = 10
@@ -126,16 +119,17 @@ while k < iter_2:
 closest_points = []
 density_function_actual = []
 points_actual = []
-for (i, j) in zip(ras1, decs1):
+for (i, j) in zip(decs1, ras1):
     #print(i)
     points_actual.append([i[0], j[0]])
+    print(points_actual)
 #print(points_actual)
-nearest_neighbor(points_actual)
-density_function_actual.append(closest_points)
+nearest_neighbor(points_actual) #appends to closest_points
+density_function_actual.append(closest_points) #TODO: Why do the cumulative distributions look so weird?
 #print(closest_points)
 n_bins = 50
 fig, ax = plt.subplots(figsize=(8, 8))
-sns.distplot(density_function_actual, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50)
+
 #n, bins, patches = ax.hist(density_function_actual, n_bins, density=True, histtype='step',
 #                           cumulative=True, label='Empirical')
 statistics_k_value = []
@@ -143,9 +137,8 @@ statistics_k_value = []
 
 for i in points_iters:
     sns.distplot(i, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50)
-#    n, bins, patches = ax.hist(i, n_bins, density=True, histtype='step',
-#                           cumulative=True, label='Empirical', color='green')
-#    statistics_k_value.append(stats.ks_2samp(i, density_function_actual[0])[0])  
+    statistics_k_value.append(stats.ks_2samp(i, density_function_actual[0]))  
+#sns.distplot(density_function_actual, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50)
  
 plt.show()
-ax.hist(statistics_k_value)
+print(statistics_k_value)
