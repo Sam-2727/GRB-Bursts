@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 21 12:12:28 2019
+
+@author: samchristian
+KS-Plot
+"""
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+data = pd.read_csv(r'/Users/samchristian/Downloads/KS-2D1.csv')
+data1 = data.iloc[:, 1]
+print(data.iloc[:, 1])
+#sns.distplot(data.iloc[:, 1], bins = 30)
+plt.hist(data.iloc[:, 1], 100)
+print(len(data1.loc[data1 < 0.046]))
+print(len(data1))
