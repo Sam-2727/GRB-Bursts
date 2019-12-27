@@ -1,0 +1,257 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Aug 25 18:47:18 2019
+
+@author: samchristian
+GRB_nearestneighbor with random data
+"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Aug 24 13:29:25 2019
+
+@author: samchristian
+KS test
+"""
+#TODO: For safety, do what horvath did and compare with other redshift ranges
+import numpy as np
+import matplotlib.pyplot as plt
+from astropy.coordinates import SkyCoord
+from astropy import units as u
+from sklearn.metrics.pairwise import haversine_distances as haversine
+import pandas as pd
+import time
+import seaborn as sns
+from scipy import stats
+from statistics import mean
+import random
+sns.set_color_codes()
+data = pd.read_csv(r'/Users/samchristian/Downloads/grb-frompaper.csv')
+#print(type(data))
+data_different = data.loc[(data['z'] <= 9.4) & (data['z'] >= 2.68)]
+data_different1 = data.loc[(data['z'] < 0.85) & (data['z'] >= 0.0085)]
+data_different2 = data.loc[(data['z'] < 1.614) & (data['z'] >= 0.85)]
+data_new = data.loc[(data['z'] < 2.68) & (data['z'] >= 1.614)]
+ras1 = data_different.loc[:, ['ra']].values
+decs1 = data_different.loc[:, ['dec']].values
+ras4 = data_different1.loc[:, ['ra']].values
+decs4 = data_different1.loc[:, ['dec']].values
+ras3 = data_different2.loc[:, ['ra']].values
+decs3 = data_different2.loc[:, ['dec']].values
+ras2 = data_new.loc[:, ['ra']].values
+decs2 = data_new.loc[:, ['dec']].values
+def random_point_on_unit_sphere():
+    while True:
+        R   = np.random.rand(3) #Random point in box
+        R   = 2*R - 1
+        rsq = sum(R**2)
+        if rsq < 1: break       #Use r only if |r|<1 in order not to favor corners of box
+    return R / np.sqrt(rsq)     #Normalize to unit vector
+
+def random_point_on_sky():
+    p     = random_point_on_unit_sphere()
+    r     = np.linalg.norm(p)
+    theta = 90 - (np.arccos(p[2] / r)    / np.pi * 180)            #theta and phi values in degrees
+    phi   =       np.arctan(p[1] / p[0]) / np.pi * 180
+    c     = SkyCoord(ra=phi, dec=theta, unit=(u.degree, u.degree)) #Create coordinate
+    return c.ra.deg, c.dec.deg                                     
+
+def print_random_star_coords(nstars):
+    dec = np.arcsin(np.random.random(1)*2-1)
+    RA = np.random.random(1)*2*np.pi
+    return [dec[0], RA[0]]
+def nearest_neighbor(points):
+    k = 0
+    while k < len(points):
+        distances = []
+        point = points[k]
+        #print(point)
+        j = 0
+        while j < len(points):
+            if k == j:
+                j += 1
+                continue
+            #print(points[j])
+            #print(point, points[j])
+            distance = haversine([point, points[j]])[0][1]*180/np.pi
+            distances.append(distance)
+            j += 1
+        #print(distances)
+        ascending = sorted(distances)
+        for m in ascending:
+            final_distributions.append(m)
+        closest_points.append(ascending[31]) #change 29 to kth nearest neighbor
+        k += 1
+
+final_distributions = []
+n = 0
+#while n < 44:
+#    final_distributions.append([])
+test_radii = 10000
+l = 0
+radius = 0.8953539
+#test_points = print_random_star_coords(test_radii)
+#print(test_points)
+points1 = []
+num = 90
+iter_2 = 1000
+l = 0
+while l < (num*iter_2 + 1): 
+   # print(l)
+    point = print_random_star_coords(1)
+    #print(point)
+    points1.append(point)
+    l += 1
+print("here!")
+#while l < 6*iter_2: #TODO: Check that all the numbers are right on theses iterations. Now CHECKED
+#    dec1, RA = print_random_star_coords(1)
+#    dec1 = dec1*180/np.pi
+#    RA = RA*180/np.pi
+#    coord = SkyCoord(ra=RA, dec=dec1, unit=(u.deg, u.deg))
+#    b = coord.galactic.b.deg
+#    if ((b < 20 and b > -20) and (dec1 > 45 or dec1 < -45)):
+#        points1.append([dec1, RA])
+#        print(l)
+#        l += 1
+a = 0
+print("here")
+while a < 9*iter_2:
+    dec1, RA = print_random_star_coords(1)
+    dec1 = dec1*180/np.pi
+    RA = RA*180/np.pi    
+    coord = SkyCoord(ra=RA, dec=dec1, unit=(u.deg, u.deg))
+    b = coord.galactic.b.deg            
+    if ((b < 20 and b > -20) and not(dec1 > 45 or dec1 < -45)):
+        points1.append([dec1, RA])          
+        a += 1    
+y = 0        
+while y < 55*iter_2:
+    dec1, RA = print_random_star_coords(1)
+    dec1 = dec1*180/np.pi
+    RA = RA*180/np.pi    
+    coord = SkyCoord(ra=RA, dec=dec1, unit=(u.deg, u.deg))
+    b = coord.galactic.b.deg
+    if (not(b < 20 and b > -20) and not(dec1 > 45 or dec1 < -45)):
+        points1.append([dec1, RA])
+        y += 1 
+c = 0
+while c < 20*iter_2:
+    dec1, RA = print_random_star_coords(1)
+    dec1 = dec1*180/np.pi
+    RA = RA*180/np.pi
+    coord = SkyCoord(ra=RA, dec=dec1, unit=(u.deg, u.deg))
+    b = coord.galactic.b.deg            
+    if (not(b < 20 and b > -20) and (dec1 > 45 or dec1 < -45)):
+        points1.append([dec1, RA])          
+        c += 1 
+
+random.shuffle(points1)
+slice_number = 0
+k = 0
+points_iters = []
+while k < iter_2:
+    closest_points = []
+    print(k)
+    sample = points1[slice_number:(slice_number+num)]
+    slice_number += num
+    nearest_neighbor(sample) 
+    points_iters.append(closest_points)
+    k += 1
+closest_points = []
+density_function_actual = []
+points_actual = []
+for (i, j) in zip(decs1, ras1):
+    #print(i)
+    points_actual.append([i[0]*np.pi/180, j[0]*np.pi/180])
+#print(points_actual)
+nearest_neighbor(points_actual)
+
+density_function_actual.append(closest_points)
+#print(closest_points)
+closest_points = []
+points_actual2 = []
+density_function_actual2 = []
+for (i, j) in zip(decs2, ras2):
+    #print(i)
+    points_actual2.append([i[0]*np.pi/180, j[0]*np.pi/180])
+nearest_neighbor(points_actual2)
+density_function_actual2.append(closest_points)
+closest_points = []
+points_actual3 = []
+density_function_actual3 = []
+for (i, j) in zip(decs3, ras3):
+    #print(i)
+    points_actual3.append([i[0]*np.pi/180, j[0]*np.pi/180])
+nearest_neighbor(points_actual3)
+density_function_actual3.append(closest_points)
+closest_points = []
+points_actual4 = []
+density_function_actual4 = []
+for (i, j) in zip(decs4, ras4):
+    #print(i)
+    points_actual4.append([i[0]*np.pi/180, j[0]*np.pi/180])
+nearest_neighbor(points_actual4)
+density_function_actual4.append(closest_points)
+n_bins = 50
+fig, ax = plt.subplots(figsize=(8, 8))
+#n, bins, patches = ax.hist(density_function_actual, n_bins, density=True, histtype='step',
+#                           cumulative=True, label='Empirical')
+statistics_k_value = []
+statistics_k_value1 = []
+statistics_k_value2 = []
+statistics_k_value3 = []
+statistics_k_value4 = []
+#statistics_k_value2.append(stats.ks_2samp(density_function_actual2[0], density_function_actual[0])[0])
+#print(density_function_actual)
+print(density_function_actual)
+i = 0
+while i < iter_2:
+    compare_1 = points_iters[i]
+    compare_2 = points_iters[i+1]
+    statistics_k_value.append(stats.ks_2samp(compare_1, compare_2)[0])
+    statistics_k_value1.append(stats.ks_2samp(compare_1, density_function_actual[0])[1])
+    statistics_k_value1.append(stats.ks_2samp(compare_2, density_function_actual[0])[1])
+    statistics_k_value3.append(stats.ks_2samp(compare_1, density_function_actual2[0])[1])
+    statistics_k_value3.append(stats.ks_2samp(compare_2, density_function_actual2[0])[1])
+    statistics_k_value4.append(stats.ks_2samp(compare_1, density_function_actual3[0])[1])
+    statistics_k_value4.append(stats.ks_2samp(compare_2, density_function_actual3[0])[1])
+    statistics_k_value2.append(stats.ks_2samp(compare_1, density_function_actual4[0])[1])
+    statistics_k_value2.append(stats.ks_2samp(compare_2, density_function_actual4[0])[1])
+    i += 2
+distribution = pd.Series(statistics_k_value3)
+lessthan = distribution[distribution < mean(statistics_k_value)]
+greaterthan = distribution[distribution > mean(statistics_k_value)]
+for i in points_iters:
+    #sns.distplot(i, hist = False, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color='g')
+    sns.distplot(i, hist=False, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color = 'g')
+sns.distplot(density_function_actual,  hist= False, hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color='y')
+sns.distplot(density_function_actual2,  hist= False,  hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color='r')
+sns.distplot(density_function_actual3,  hist= False,   hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color='y')
+sns.distplot(density_function_actual4,  hist= False,  hist_kws=dict(cumulative=True), kde_kws=dict(cumulative=True), bins = 50, color='y')
+
+print(len(lessthan))
+print(len(greaterthan))
+print(len(distribution))
+print(mean(statistics_k_value))
+print(len(ras1))
+print(len(ras2))
+print(len(ras3))
+print(len(ras4))
+#print(ras1[89])
+#print(ras2[89])
+#print(ras3[89])
+#print(ras4[89])
+#print(ras1[0])
+#print(ras2[0])
+#print(ras3[0])
+#print(ras4[0])
+print(stats.ks_2samp(density_function_actual2[0], density_function_actual[0]))
+print(stats.ks_2samp(density_function_actual3[0], density_function_actual[0]))
+print(stats.ks_2samp(density_function_actual4[0], density_function_actual[0]))
+print(stats.ks_2samp(density_function_actual2[0], density_function_actual3[0]))
+print(stats.ks_2samp(density_function_actual2[0], density_function_actual4[0]))
+print(stats.ks_2samp(density_function_actual3[0], density_function_actual4[0]))
+#print(statistics_k_value)
+#print(statistics_k_value1)
+#sns.distplot(distribution, kde= False, color='b')
