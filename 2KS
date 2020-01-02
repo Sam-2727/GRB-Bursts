@@ -50,12 +50,6 @@ points1 = []
 num = 44
 iter_2 = 5000
 l = 0
-#while l < (num*iter_2 + 1): 
-#   # print(l)
-#    point = print_random_star_coords(1)
-#    #print(point)
-#    points1.append(point)
-#    l += 1
 slice_number = 0
 k = 0
 points_iters = []
@@ -79,7 +73,8 @@ while k < iter_2:
         l += 1
     ras2 = []
     decs2 = []
-    test_stat = ndtest.ks2d2s(ras11, decs11, ras22, decs22, extra=True)[1]
+    #0 is p-value, 1 is KS statisitc
+    test_stat = ndtest.ks2d2s(ras11, decs11, ras22, decs22, extra=True)[0]
     print(test_stat)
     test_stats.append(test_stat)
     k += 1
