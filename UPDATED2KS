@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 21 09:06:59 2019
+
+@author: samchristian
+2KS-random sample
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Sep 17 10:25:24 2019
+
+@author: samchristian
+"""
+#Same as original 2D-KS
+#Except works with updated dataset
+import sys
+import numpy as np
+import pandas as pd
+from astropy.coordinates import SkyCoord
+from astropy import units as u
+import matplotlib.pyplot as plt
+from scipy.stats import kstwobign, pearsonr
+import statistics
+print(pd.__file__)
+sys.path.append('/Users/samchristian/Downloads/2DKS-master')
+sys.path.append('/Users/samchristian/Downloads/ndtest-master')
+import KS2D
+import ndtest
+data = pd.read_csv(r'/Users/samchristian/Downloads/grb-frompaper.csv')
+print(len(data[(data['dec'] < 20) & (data['dec'] > -20)])) #TODO: change to l
+print(len(data))
+coord_final = SkyCoord(ra=data.loc[:, ['ra']].values, dec=data.loc[:, ['dec']].values, unit=(u.degree, u.degree))
+print(len(data[(coord_final.galactic.b.deg < 20) & (coord_final.galactic.b.deg > -20)]))
+data = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
+zs1 = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
+ras1 = data.loc[:, ['ra']].values
+decs1 = data.loc[:, ['dec']].values
+def print_random_star_coords(nstars):
+    dec = np.arcsin(np.random.random(1)*2-1)
+    RA = np.random.random(1)*2*np.pi
+    return [dec[0]*180/np.pi, RA[0]*180/np.pi]
+points1 = []
+num = 75
+iter_2 = 5000
+l = 0
+#while l < (num*iter_2 + 1): 
+#   # print(l)
+#    point = print_random_star_coords(1)
+#    #print(point)
+#    points1.append(point)
+#    l += 1
+slice_number = 0
+k = 0
+points_iters = []
+points_actual = []
+test_stats = []
+    
+while k < iter_2:
+    ras11 = []
+    decs11  = []
+    ras22 = []
+    decs22 = []
+#    l = 0
+#    while l < 3*iter_2: #TODO: Check that all the numbers are right on theses iterations
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg
+#        if ((b < 20 and b > -20) and (dec > 45 or dec < -45)):
+#            np.append(ras11, RA)
+#            l += 1         
+#    a = 0
+#    while a < 4*iter_2:
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg            
+#        if ((b < 20 and b > -20) and not(dec > 45 or dec < -45)):
+#            np.append(ras11, RA)       
+#            a += 1    
+#    y = 0        
+#    while y < 27*iter_2:
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg
+#        if (not(b < 20 and b > -20) and not(dec > 45 or dec < -45)):
+#            points1.append([dec, RA])
+#            y += 1 
+#    c = 0
+#    while c < 10*iter_2:
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg            
+#        if (not(b < 20 and b > -20) and (dec > 45 or dec < -45)):
+#            points1.append([dec, RA])          
+#            c += 1 
+    c = 0
+    while c < 75:
+         dec1, RA1 = print_random_star_coords(1)  
+         ras11 = np.append(ras11, RA1)
+         decs11 = np.append(decs11, dec1)
+         c += 1      
+    c = 0
+    while c < 75:
+         dec1, RA1 = print_random_star_coords(1)  
+         ras22 = np.append(ras22, RA1)
+         decs22 = np.append(decs22, dec1)
+         c += 1                   
+    test_stat = ndtest.ks2d2s(ras11, decs11, ras22, decs22, extra=True)[1]
+    print(test_stat)
+    test_stats.append(test_stat)
+    k += 1
+print(statistics.mean(test_stats))
+print(statistics.variance(test_stats))
+plt.figure()
+plt.hist(test_stats)
+df = pd.DataFrame(test_stats)
+df.to_csv(r'/Users/samchristian/Downloads/KS-2D4.csv')
