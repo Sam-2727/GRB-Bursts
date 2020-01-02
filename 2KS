@@ -1,84 +1,118 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Sat Sep 21 09:06:59 2019
+
+@author: samchristian
+2KS-random sample
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Tue Sep 17 10:25:24 2019
 
 @author: samchristian
 2D-KS
 """
-#print(type(data))
+#will calculate Monte Carlo
+#KS statistics and p-values
 import sys
 import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 import matplotlib.pyplot as plt
-from scipy.stats import kstwobign, pearsonr
 import statistics
 print(pd.__file__)
+#change to custom file path. This is downloaded from
+#https://github.com/syrte/ndtest
 sys.path.append('/Users/samchristian/Downloads/2DKS-master')
 sys.path.append('/Users/samchristian/Downloads/ndtest-master')
-import KS2D
 import ndtest
 data = pd.read_csv(r'/Users/samchristian/Downloads/grb-frompaper.csv')
+print(len(data))
+coord_final = SkyCoord(ra=data.loc[:, ['ra']].values, dec=data.loc[:, ['dec']].values, unit=(u.degree, u.degree))
 data = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
+zs1 = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
 ras1 = data.loc[:, ['ra']].values
 decs1 = data.loc[:, ['dec']].values
-def random_point_on_unit_sphere():
-    while True:
-        R   = np.random.rand(3) #Random point in box
-        R   = 2*R - 1
-        rsq = sum(R**2)
-        if rsq < 1: break       #Use r only if |r|<1 in order not to favor corners of box
-    return R / np.sqrt(rsq)     #Normalize to unit vector
-
-def random_point_on_sky():
-    p     = random_point_on_unit_sphere()
-    r     = np.linalg.norm(p)
-    theta = 90 - (np.arccos(p[2] / r)    / np.pi * 180)            #theta and phi values in degrees
-    phi   =       np.arctan(p[1] / p[0]) / np.pi * 180
-    c     = SkyCoord(ra=phi, dec=theta, unit=(u.degree, u.degree)) #Create coordinate
-    return c.ra.deg, c.dec.deg                                     
 
 def print_random_star_coords(nstars):
     dec = np.arcsin(np.random.random(1)*2-1)
     RA = np.random.random(1)*2*np.pi
     return [dec[0]*180/np.pi, RA[0]*180/np.pi]
-        #ras22 = np.append(ras22, RA)
-        #decs22 = np.append(decs22, dec)
 points1 = []
 num = 44
+#iter_2 is number of iterations
 iter_2 = 5000
 l = 0
 slice_number = 0
 k = 0
 points_iters = []
 points_actual = []
-ras11 = []
-for i in ras1:
-    ras11 = np.append(ras11, i[0])
-decs11 = []
-for i in decs1:
-    decs11 = np.append(decs11, i[0])
 test_stats = []
-print(len(points_actual))
+    
 while k < iter_2:
+    ras11 = []
+    decs11  = []
     ras22 = []
     decs22 = []
-    l = 0
-    while l < 44: 
-        dec, RA = print_random_star_coords(1)  
-        ras22 = np.append(ras22, RA)
-        decs22 = np.append(decs22, dec)
-        l += 1
-    ras2 = []
-    decs2 = []
-    #0 is p-value, 1 is KS statisitc
+#uncomment to calculate with extinction
+#    l = 0
+#    while l < 3*iter_2:
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg
+#        if ((b < 20 and b > -20) and (dec > 45 or dec < -45)):
+#            np.append(ras11, RA)
+#            l += 1         
+#    a = 0
+#    while a < 4*iter_2:
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg            
+#        if ((b < 20 and b > -20) and not(dec > 45 or dec < -45)):
+#            np.append(ras11, RA)       
+#            a += 1    
+#    y = 0        
+#    while y < 27*iter_2:
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg
+#        if (not(b < 20 and b > -20) and not(dec > 45 or dec < -45)):
+#            points1.append([dec, RA])
+#            y += 1 
+#    c = 0
+#    while c < 10*iter_2:
+#        dec, RA = print_random_star_coords(1)
+#        coord = SkyCoord(ra=RA, dec=dec, unit=(u.deg, u.deg))
+#        b = coord.galactic.b.deg            
+#        if (not(b < 20 and b > -20) and (dec > 45 or dec < -45)):
+#            points1.append([dec, RA])          
+#            c += 1 
+    c = 0
+    while c < 44:
+         dec1, RA1 = print_random_star_coords(1)  
+         ras11 = np.append(ras11, RA1)
+         decs11 = np.append(decs11, dec1)
+         c += 1      
+    c = 0
+    while c < 44:
+         dec1, RA1 = print_random_star_coords(1)  
+         ras22 = np.append(ras22, RA1)
+         decs22 = np.append(decs22, dec1)
+         c += 1
+    #0 is p-value, 2 is KS statistic                   
     test_stat = ndtest.ks2d2s(ras11, decs11, ras22, decs22, extra=True)[0]
     print(test_stat)
     test_stats.append(test_stat)
     k += 1
-print(len(ras11))
 print(statistics.mean(test_stats))
+#make sure to not use the variance when inputting into 2KS-plot!
 print(statistics.variance(test_stats))
+plt.figure()
 plt.hist(test_stats)
+df = pd.DataFrame(test_stats)
+#change to custom file path
+df.to_csv(r'/Users/samchristian/Downloads/KS-2D1.csv')
