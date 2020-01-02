@@ -8,13 +8,8 @@ GRB_nearestneighbor with random data
 """
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Aug 24 13:29:25 2019
-
-@author: samchristian
-KS test
-"""
-#TODO: For safety, do what horvath did and compare with other redshift ranges
+#Same as original kth nearest neigbor
+#except works with updated dataset
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.coordinates import SkyCoord
@@ -28,7 +23,6 @@ from statistics import mean
 import random
 sns.set_color_codes()
 data = pd.read_csv(r'/Users/samchristian/Downloads/grb-updated2019.csv')
-#print(type(data))
 data_different = data.loc[(data['Redshift'] <= 9.4) & (data['Redshift'] >= 2.68)]
 data_different1 = data.loc[(data['Redshift'] < 0.85) & (data['Redshift'] >= 0.0085)]
 data_different2 = data.loc[(data['Redshift'] < 1.614) & (data['Redshift'] >= 0.85)]
@@ -42,22 +36,6 @@ ras3 = data_different2.loc[:, ['RA']].values
 decs3 = data_different2.loc[:, ['Dec']].values
 ras2 = data_new.loc[:, ['RA']].values
 decs2 = data_new.loc[:, ['Dec']].values
-def random_point_on_unit_sphere():
-    while True:
-        R   = np.random.rand(3) #Random point in box
-        R   = 2*R - 1
-        rsq = sum(R**2)
-        if rsq < 1: break       #Use r only if |r|<1 in order not to favor corners of box
-    return R / np.sqrt(rsq)     #Normalize to unit vector
-
-def random_point_on_sky():
-    p     = random_point_on_unit_sphere()
-    r     = np.linalg.norm(p)
-    theta = 90 - (np.arccos(p[2] / r)    / np.pi * 180)            #theta and phi values in degrees
-    phi   =       np.arctan(p[1] / p[0]) / np.pi * 180
-    c     = SkyCoord(ra=phi, dec=theta, unit=(u.degree, u.degree)) #Create coordinate
-    return c.ra.deg, c.dec.deg                                     
-
 def print_random_star_coords(nstars):
     dec = np.arcsin(np.random.random(1)*2-1)
     RA = np.random.random(1)*2*np.pi
@@ -67,44 +45,33 @@ def nearest_neighbor(points):
     while k < len(points):
         distances = []
         point = points[k]
-        #print(point)
         j = 0
         while j < len(points):
             if k == j:
                 j += 1
                 continue
-            #print(points[j])
-            #print(point, points[j])
             distance = haversine([point, points[j]])[0][1]*180/np.pi
             distances.append(distance)
             j += 1
-        #print(distances)
         ascending = sorted(distances)
         for m in ascending:
             final_distributions.append(m)
-        closest_points.append(ascending[31]) #change 29 to kth nearest neighbor
+        closest_points.append(ascending[31]) #change 31 to kth nearest neighbor
         k += 1
 
 final_distributions = []
 n = 0
-#while n < 44:
-#    final_distributions.append([])
 test_radii = 10000
 l = 0
 radius = 0.8953539
-#test_points = print_random_star_coords(test_radii)
-#print(test_points)
 points1 = []
 num = 138
 iter_2 = 1000
 l = 0
 while l < (num*iter_2 + 1): 
-   # print(l)
     point = print_random_star_coords(1)
-    #print(point)
     points1.append(point)
     l += 1
-print("here!")
 #while l < 20*iter_2: #TODO: Check that all the numbers are right on theses iterations
 #    dec1, RA = print_random_star_coords(1)
 #    dec1 = dec1*180/np.pi
@@ -162,16 +129,13 @@ closest_points = []
 density_function_actual = []
 points_actual = []
 for (i, j) in zip(decs1, ras1):
-    #print(i)
     coord = SkyCoord((j[0] + i[0]), unit=(u.hourangle, u.deg))
     dec = coord.dec.degree
     ra = coord.ra.degree
     points_actual.append([dec*np.pi/180, ra*np.pi/180])
-#print(points_actual)
 nearest_neighbor(points_actual)
 
 density_function_actual.append(closest_points)
-#print(closest_points)
 closest_points = []
 points_actual2 = []
 density_function_actual2 = []
@@ -255,14 +219,9 @@ print(len(ras1))
 print(len(ras2))
 print(len(ras3))
 print(len(ras4))
-#print(ras1[89])
-#print(ras2[89])
-#print(ras3[89])
-#print(ras4[89])
-#print(ras1[0])
-#print(ras2[0])
-#print(ras3[0])
-#print(ras4[0])
+#This can be uncommented, but the code runs faster if only
+#the suspect range is calculated on
+
 #print(stats.ks_2samp(density_function_actual2[0], density_function_actual[0]))
 #print(stats.ks_2samp(density_function_actual3[0], density_function_actual[0]))
 #print(stats.ks_2samp(density_function_actual4[0], density_function_actual[0]))
