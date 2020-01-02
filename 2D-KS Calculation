@@ -17,4 +17,5 @@ print(data.iloc[:, 1])
 #sns.distplot(data.iloc[:, 1], bins = 30)
 plt.hist(data.iloc[:, 1], 100)
 print(len(data1.loc[data1 < 0.22321333333333335]))
+#Change the above to the generated value from the 2D-KS Random File.
 print(len(data1))
