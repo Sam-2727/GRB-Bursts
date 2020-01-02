@@ -4,16 +4,6 @@
 Created on Sat Sep 21 09:06:59 2019
 
 @author: samchristian
-2KS-random sample
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 17 10:25:24 2019
-
-@author: samchristian
-2D-KS
 """
 #will calculate Monte Carlo
 #KS statistics and p-values
