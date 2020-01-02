@@ -5,4 +5,4 @@ The code makes more sense when reading the paper. In the paper, I present a brie
 The interested reader might also find this powerpoint (link once finished) interesting, as some figures that aren't in the paper are presented there
 
 ## Update Log
-January 2020: Code cleaned up and renamed for clarity.
+January 2020: Code cleaned up and renamed for clarity. Data sets added.
