@@ -5,7 +5,7 @@ Created on Sat Aug 17 17:43:45 2019
 
 @author: samchristian
 """
-
+#Performs point-radius method on actual sample
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import haversine_distances as haversine
 import time
 start_time = time.time()
 data = pd.read_csv(r'/Users/samchristian/Downloads/grb-frompaper.csv')
-#print(type(data))
+#change to your filepath
 ras = data.loc[:, ['ra']]
 decs = data.loc[:, ['dec']]
 i = 0
@@ -23,6 +23,8 @@ num_in_range = 0
 num_in_range2 = 0
 num_in_range3 = 0
 num_in_range4 = 0
+#not part of the point radius method.
+#Calculates number of bursts within each sky division
 while i < len(ras):
     #decs[i]
     coord = SkyCoord(ra=ras.iloc[i], dec=decs.iloc[i], unit=(u.deg, u.deg))
@@ -45,66 +47,39 @@ ras11 = data.loc[:, ['ra']]
 decs11 = data.loc[:, ['dec']]
 DFoutput = pd.concat([ras11, decs11], axis = 1)
 DFoutput.to_csv('/Users/samchristian/Downloads/grb-doublecheck1.csv')
-#print(ras)
-#print(decs)
-#zs = zs1[[zs1 <= 2.1]]
-#zs = zs[zs1 >= 1.6]
-#ras = ras1[[zs1 <= 2.1]]
-#ras = ras[[[zs1 >= 1.6]]]
-#decs = decs1[[zs1 <= 2.1]]
-#decs = decs[[zs1 >= 1.6]]
 ras_inrange = []
 decs_inrange = []
-def random_point_on_unit_sphere():
-    while True:
-        R   = np.random.rand(3) #Random point in box
-        R   = 2*R - 1
-        rsq = sum(R**2)
-        if rsq < 1: break       #Use r only if |r|<1 in order not to favor corners of box
-    return R / np.sqrt(rsq)     #Normalize to unit vector
-
 def random_point_on_sky():
     dec = np.arcsin(np.random.random(1)*2-1)
     RA = np.random.random(1)*2*np.pi
-    return [RA*180/np.pi, dec*180/np.pi]                                    #Many different formats are possible, e.g c.ra.hour for decimal hour values
-
+    return [RA*180/np.pi, dec*180/np.pi]
+#returns in degrees
 def print_random_star_coords(nstars):
     dec = np.arcsin(np.random.random(1)*2-1)
     RA = np.random.random(1)*2*np.pi
     return [dec[0], RA[0]]
+#returns in radians
 i = 0
 ras1 = []
 decs1 = []
 print(len(ras11))
 while i < len(ras11):
-    #print(ras11.iloc[i].values[0])
     ras1.append(ras11.iloc[i])
     decs1.append(decs11.iloc[i])
     i += 1
 test_radii = 10000
 i = 0
 radius = 0.8953539
-test_points = print_random_star_coords(test_radii)
-#print(test_points)
 num_in_distance = []
 max_coords = []
-print("here")
 while i < test_radii:
     in_distance = []
     test_point = print_random_star_coords(1)
     max_coords.append(test_point)
-    #print(test_point)
-    #test_point = test_points[i]
     j = 0
-    #print(test_point)
     while j < len(ras1):
-        #print("j")
-        #print(ras1)
         distance = haversine([test_point, [decs1[j]*np.pi/180, ras1[j]*np.pi/180]])
-        #print(ras1.iloc[j], decs1.iloc[j])
-        #print(distance)
         if distance[0][1] < radius:
-            #print(distance[0][1])
             in_distance.append(1)
         j += 1
     num_in_distance.append(len(in_distance))
@@ -115,15 +90,15 @@ max_coord = max_coords[max_coord_index]
 print(max_coord)
 i = 0
 coords_in_radius = []
+#This section is to find the bursts located within the optimal circle
+#It is used to generate the demonstrate the location of the HCB
 while i < len(ras1):
     distance = haversine([max_coord, [decs1[i]*np.pi/180, ras1[i]*np.pi/180]])
     if distance[0][1] < radius:
         coords_in_radius.append([ras1[i].values[0], decs1[i].values[0]])
     i += 1
 print(coords_in_radius)
-#279.95833*np.pi/180 273.90467*np.pi/180
-#print(1)
-#print(len(ras1))
 outputradius = pd.DataFrame.from_records(coords_in_radius)        
 print("--- %s seconds ---" % (time.time() - start_time))
-outputradius.to_csv('/Users/samchristian/Downloads/grb-outputinradius1.csv') #NOTE: With no number is the original. 1 is with the updated sample
+#Change to custom filepath
+outputradius.to_csv('/Users/samchristian/Downloads/grb-outputinradius1.csv')
