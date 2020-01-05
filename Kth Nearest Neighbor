@@ -43,18 +43,14 @@ def nearest_neighbor(points):
     while k < len(points):
         distances = []
         point = points[k]
-        #print(point)
         j = 0
         while j < len(points):
             if k == j:
                 j += 1
                 continue
-            #print(points[j])
-            #print(point, points[j])
             distance = haversine([point, points[j]])[0][1]*180/np.pi
             distances.append(distance)
             j += 1
-        #print(distances)
         ascending = sorted(distances)
         for m in ascending:
             final_distributions.append(m)
