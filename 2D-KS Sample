@@ -24,22 +24,6 @@ data = pd.read_csv(r'/Users/samchristian/Downloads/grb-frompaper.csv')
 data = data.loc[(data['z'] <= 2.1) & (data['z'] >= 1.6)]
 ras1 = data.loc[:, ['ra']].values
 decs1 = data.loc[:, ['dec']].values
-def random_point_on_unit_sphere():
-    while True:
-        R   = np.random.rand(3) #Random point in box
-        R   = 2*R - 1
-        rsq = sum(R**2)
-        if rsq < 1: break       #Use r only if |r|<1 in order not to favor corners of box
-    return R / np.sqrt(rsq)     #Normalize to unit vector
-
-def random_point_on_sky():
-    p     = random_point_on_unit_sphere()
-    r     = np.linalg.norm(p)
-    theta = 90 - (np.arccos(p[2] / r)    / np.pi * 180)            #theta and phi values in degrees
-    phi   =       np.arctan(p[1] / p[0]) / np.pi * 180
-    c     = SkyCoord(ra=phi, dec=theta, unit=(u.degree, u.degree)) #Create coordinate
-    return c.ra.deg, c.dec.deg                                     
-
 def print_random_star_coords(nstars):
     dec = np.arcsin(np.random.random(1)*2-1)
     RA = np.random.random(1)*2*np.pi
