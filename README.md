@@ -1,4 +1,4 @@
-# GRB-Bursts
+# Gamma-ray burst isotropy
 Here I provide the code for the paper entitled "Re-Examining the Evidence of the Hercules-Corona-Borealis Great Wall".
 
 The code makes more sense when reading the paper. In the paper, I present a brief overview of each test.
